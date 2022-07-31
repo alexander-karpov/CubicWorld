@@ -10,38 +10,69 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     public float Speed = 5f;
 
-    // public Transform groundCheck;
-    // [SerializeField]
-    // public LayerMask groundLayer;
-    // public SpriteRenderer spriteRenderer;
-    // [SerializeField]
-    // private Bounds _characterBounds;
-    Rigidbody2D rb;
+    [SerializeField]
+    public float JumpHeight = 1f;
+
+    [SerializeField]
+    public AnimationCurve jumpCurve;
+
+    SpriteRenderer _spriteRenderer;
+
+    Rigidbody2D _rb;
 
     RaycastHit2D[] moveCollisions = new RaycastHit2D[3];
+
+    Vector2 _groundNormal = Vector2.up;
+
+    Vector2 _positionOnGround;
+
+    float _heightAboveGround = 0f;
+
+    float _jumpDuration = 0f;
 
     // bool isFacingRight = true;
     // Start is called before the first frame update
     void Start()
     {
-        rb = this.GetComponent<Rigidbody2D>();
-        rb.isKinematic = true;
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        _rb = this.GetComponent<Rigidbody2D>();
+        _rb.bodyType = RigidbodyType2D.Kinematic;
+        _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        // spriteRenderer = this.GetComponent<SpriteRenderer>();
+        _spriteRenderer = this.GetComponent<SpriteRenderer>();
     }
 
     void FixedUpdate()
     {
         var horizontal = Input.GetAxisRaw("Horizontal");
+        var jump = Input.GetAxisRaw("Jump");
 
-        if (horizontal == 0)
+        if (horizontal != 0)
         {
-            return;
+            Move (horizontal);
+            Flip(horizontal > 0);
         }
 
-        Move2 (horizontal);
+        if (jump > 0 && _jumpDuration == 0)
+        {
+            _jumpDuration += Time.fixedDeltaTime;
+            _heightAboveGround = jumpCurve.Evaluate(_jumpDuration);
+
+            _rb.MovePosition(_positionOnGround + Vector2.up * _heightAboveGround);
+        }
+
+        if (_jumpDuration > 0)
+        {
+            _jumpDuration += Time.fixedDeltaTime;
+            _heightAboveGround = jumpCurve.Evaluate(_jumpDuration);
+
+            _rb.MovePosition(_positionOnGround + Vector2.up * _heightAboveGround);
+
+            if (_jumpDuration >= 1f)
+            {
+                _jumpDuration = 0;
+            }
+        }
 
         // if (!IsGrounded)
         // {
@@ -52,131 +83,55 @@ public class PlayerController : MonoBehaviour
         //     Vector2.right * Time.fixedDeltaTime * Input.GetAxisRaw("Horizontal") * Speed);
     }
 
-    // // private bool IsGrounded
-    // // {
-    // //     get
-    // //     {
-    // //         return Physics2D.Overlap
-    // //     }
-    // // }
-    // void Flip()
-    // {
-    //     isFacingRight = !isFacingRight;
-    //     spriteRenderer.flipX = isFacingRight;
-    // }
-    // void Fall()
-    // {
-    //     rb.MovePosition(rb.position + Vector2.down * Time.fixedDeltaTime * 5);
-    // }
-    // void OnDrawGizmos()
-    // {
-    //     var cf = new ContactFilter2D();
-    //     cf.SetLayerMask(groundLayer);
-    //     rb.OverlapCollider(cf, )
-    //     // Draw a yellow sphere at the transform's position
-    //     Gizmos.color = Color.yellow;
-    //     Gizmos.DrawRay(transform.position, Vector3.right);
-    // }
-    // void Move(float horizontal)
-    // {
-    //     var direction = Vector2.down;
-    //     int count = rb.Cast(direction, MovementFilter, moveCollisions, Speed * Time.fixedDeltaTime);
-    //     if (count == 0)
-    //     {
-    //         rb.MovePosition(rb.position + direction * Speed * Time.fixedDeltaTime);
-    //         return;
-    //     }
-    //     var directionAlongCollision = Vector2.Perpendicular(moveCollisions[0].normal) * -horizontal;
-    //     count =
-    //         rb
-    //             .Cast(directionAlongCollision,
-    //             MovementFilter,
-    //             moveCollisions,
-    //             Speed * Time.fixedDeltaTime);
-    //     if (count == 0)
-    //     {
-    //         rb.MovePosition(rb.position + directionAlongCollision * Speed * Time.fixedDeltaTime);
-    //         return;
-    //     }
-    //     directionAlongCollision = Vector2.Perpendicular(moveCollisions[0].normal) * -horizontal;
-    //     count =
-    //         rb
-    //             .Cast(directionAlongCollision,
-    //             MovementFilter,
-    //             moveCollisions,
-    //             Speed * Time.fixedDeltaTime);
-    //     if (count == 0)
-    //     {
-    //         rb.MovePosition(rb.position + directionAlongCollision * Speed * Time.fixedDeltaTime);
-    //         return;
-    //     }
-    // }
-    void Move2(float horizontal)
+    void Flip(bool isFacingRight)
     {
-        var newPosition = rb.position;
-
-        // var lookingAhead = newPosition + new Vector2(horizontal, 10f) * Speed * Time.fixedDeltaTime;
-        var lookingAhead = rb.position + Vector2.up * 3f;
-
-        // // var collisions = new RaycastHit2D[1];
-        int count =
-            Physics2D
-                .RaycastNonAlloc(lookingAhead,
-                Vector2.down,
-                moveCollisions,
-                // Расстояние обязательно, без него не работает маска
-                // https://answers.unity.com/questions/1699320/why-wont-physicsraycastnonalloc-mask-layers-proper.html
-                10f,
-                MovementFilter.layerMask);
-        if (count == 0)
+        if (
+            isFacingRight && transform.localScale.x < 0 ||
+            !isFacingRight && transform.localScale.x > 0
+        )
         {
-            return;
+            var s = transform.localScale;
+            s.x *= -1;
+            transform.localScale = s;
         }
-        var ground = moveCollisions[0];
-        var dirAlongGround = Vector2.Perpendicular(ground.normal) * -horizontal;
-        newPosition += dirAlongGround * Speed * Time.fixedDeltaTime;
-
-        // count = rb.Cast(Vector2.down, MovementFilter, moveCollisions);
-        // if (count != 0)
-        // {
-        //     newPosition += Vector2.down * moveCollisions[0].distance;
-        // }
-        count =
-            Physics2D
-                .RaycastNonAlloc(newPosition + Vector2.up * 3f,
-                Vector2.down,
-                moveCollisions,
-                // Расстояние обязательно, без него не работает маска
-                // https://answers.unity.com/questions/1699320/why-wont-physicsraycastnonalloc-mask-layers-proper.html
-                10f,
-                MovementFilter.layerMask);
-
-        rb.MoveRotation(Vector2.Angle(Vector2.up, moveCollisions[0].normal));
-        rb.MovePosition(moveCollisions[0].point);
     }
 
-    void OnDrawGizmos()
+    void Move(float horizontal)
     {
-        // foreach (var c in moveCollisions)
-        // {
-        //     Gizmos.DrawRay(transform.position, c.normal);
-        // }
-        var horizontal = Input.GetAxisRaw("Horizontal");
+        var directionAlongGround = Vector2.Perpendicular(_groundNormal) * -horizontal;
+        var movement = directionAlongGround * Speed * Time.fixedDeltaTime;
 
-        if (horizontal != 0)
+        var (normal, point, distance) = CastDown(_rb.position + movement, MovementFilter);
+        _groundNormal = normal;
+        _positionOnGround = point;
+
+        _rb.MovePosition(point + Vector2.up * _heightAboveGround);
+        _rb.MoveRotation(Vector2.SignedAngle(Vector2.up, _groundNormal));
+    }
+
+    static (Vector2 normal, Vector2 point, float distance)
+    CastDown(Vector2 position, ContactFilter2D contactFilter)
+    {
+        // Если не поднять точку, то она пропустит землю,
+        // если мы в неё немного провалились
+        var pointAbove = position + Vector2.up * 5f;
+        var collisions = new RaycastHit2D[1];
+
+        int count =
+            Physics2D
+                .RaycastNonAlloc(pointAbove,
+                Vector2.down,
+                collisions,
+                // Расстояние обязательно, без него не работает маска
+                // https://answers.unity.com/questions/1699320/why-wont-physicsraycastnonalloc-mask-layers-proper.html
+                100f,
+                contactFilter.layerMask);
+
+        if (count != 0)
         {
-            var dir = new Vector2(horizontal, 0);
-            Gizmos.color = Color.red;
-
-            Gizmos.DrawRay(transform.position, dir);
-
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawRay(transform.position, moveCollisions[0].normal);
-
-            Gizmos.color = Color.green;
-            Gizmos
-                .DrawRay(transform.position,
-                Vector2.Perpendicular(moveCollisions[0].normal) * -horizontal);
+            return (collisions[0].normal, collisions[0].point, collisions[0].distance);
         }
+
+        return (Vector2.up, position, 0f);
     }
 }
