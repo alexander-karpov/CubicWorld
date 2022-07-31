@@ -11,10 +11,13 @@ public class PlayerController : MonoBehaviour
     public float Speed = 5f;
 
     [SerializeField]
-    public float JumpHeight = 1f;
+    public float JumpHeight = 1.5f;
 
     [SerializeField]
     public AnimationCurve jumpCurve;
+
+    [SerializeField]
+    public float JumpDuration = 1f;
 
     SpriteRenderer _spriteRenderer;
 
@@ -26,9 +29,7 @@ public class PlayerController : MonoBehaviour
 
     Vector2 _positionOnGround;
 
-    float _heightAboveGround = 0f;
-
-    float _jumpDuration = 0f;
+    float _jumpTime = 0f;
 
     // bool isFacingRight = true;
     // Start is called before the first frame update
@@ -40,6 +41,8 @@ public class PlayerController : MonoBehaviour
         _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
         _spriteRenderer = this.GetComponent<SpriteRenderer>();
+
+        _positionOnGround = _rb.position;
     }
 
     void FixedUpdate()
@@ -47,47 +50,59 @@ public class PlayerController : MonoBehaviour
         var horizontal = Input.GetAxisRaw("Horizontal");
         var jump = Input.GetAxisRaw("Jump");
 
-        if (horizontal != 0)
-        {
-            Move (horizontal);
-            Flip(horizontal > 0);
-        }
-
-        if (jump > 0 && _jumpDuration == 0)
-        {
-            _jumpDuration += Time.fixedDeltaTime;
-            _heightAboveGround = jumpCurve.Evaluate(_jumpDuration);
-
-            _rb.MovePosition(_positionOnGround + Vector2.up * _heightAboveGround);
-        }
-
-        if (_jumpDuration > 0)
-        {
-            _jumpDuration += Time.fixedDeltaTime;
-            _heightAboveGround = jumpCurve.Evaluate(_jumpDuration);
-
-            _rb.MovePosition(_positionOnGround + Vector2.up * _heightAboveGround);
-
-            if (_jumpDuration >= 1f)
-            {
-                _jumpDuration = 0;
-            }
-        }
-
-        // if (!IsGrounded)
-        // {
-        //     Fall();
-        // }
-        // rb
-        //     .MovePosition(rb.position +
-        //     Vector2.right * Time.fixedDeltaTime * Input.GetAxisRaw("Horizontal") * Speed);
+        Move (horizontal);
+        Flip (horizontal);
+        Jump (jump);
     }
 
-    void Flip(bool isFacingRight)
+    Vector2 JumpOffset
     {
+        get
+        {
+            return _groundNormal * jumpCurve.Evaluate(_jumpTime / JumpDuration) * JumpHeight;
+        }
+    }
+
+    private void Jump(float jump)
+    {
+        if (jump > 0 && _jumpTime == 0 || _jumpTime > 0)
+        {
+            _jumpTime += Time.fixedDeltaTime;
+            _rb.MovePosition(_positionOnGround + JumpOffset);
+
+            if (_jumpTime >= JumpDuration)
+            {
+                _jumpTime = 0;
+            }
+        }
+    }
+
+    void Move(float horizontal)
+    {
+        if (horizontal == 0)
+        {
+            return;
+        }
+
+        var directionAlongGround = Vector2.Perpendicular(_groundNormal) * -horizontal;
+        var movement = directionAlongGround * Speed * Time.fixedDeltaTime;
+
+        var (normal, point) = CastDown(_rb.position + movement - JumpOffset, MovementFilter);
+        _groundNormal = normal;
+        _positionOnGround = point;
+
+        _rb.MovePosition(_positionOnGround + JumpOffset);
+        _rb.MoveRotation(Vector2.SignedAngle(Vector2.up, _groundNormal));
+    }
+
+    void Flip(float horizontal)
+    {
+        var isFacingRight = horizontal > 0;
+        var isFacingLeft = horizontal < 0;
+
         if (
             isFacingRight && transform.localScale.x < 0 ||
-            !isFacingRight && transform.localScale.x > 0
+            isFacingLeft && transform.localScale.x > 0
         )
         {
             var s = transform.localScale;
@@ -96,21 +111,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Move(float horizontal)
-    {
-        var directionAlongGround = Vector2.Perpendicular(_groundNormal) * -horizontal;
-        var movement = directionAlongGround * Speed * Time.fixedDeltaTime;
-
-        var (normal, point, distance) = CastDown(_rb.position + movement, MovementFilter);
-        _groundNormal = normal;
-        _positionOnGround = point;
-
-        _rb.MovePosition(point + Vector2.up * _heightAboveGround);
-        _rb.MoveRotation(Vector2.SignedAngle(Vector2.up, _groundNormal));
-    }
-
-    static (Vector2 normal, Vector2 point, float distance)
-    CastDown(Vector2 position, ContactFilter2D contactFilter)
+    static (Vector2 normal, Vector2 point) CastDown(Vector2 position, ContactFilter2D contactFilter)
     {
         // Если не поднять точку, то она пропустит землю,
         // если мы в неё немного провалились
@@ -129,9 +130,9 @@ public class PlayerController : MonoBehaviour
 
         if (count != 0)
         {
-            return (collisions[0].normal, collisions[0].point, collisions[0].distance);
+            return (collisions[0].normal, collisions[0].point);
         }
 
-        return (Vector2.up, position, 0f);
+        return (Vector2.up, position);
     }
 }

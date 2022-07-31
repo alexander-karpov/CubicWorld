@@ -210,7 +210,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -234,7 +234,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 14.7, y: 2.3, z: -10}
+  m_LocalPosition: {x: 11.3, y: 3.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -863,11 +863,11 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1267879997}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 2
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
@@ -903,7 +903,7 @@ MonoBehaviour:
     minNormalAngle: 0
     maxNormalAngle: 0
   Speed: 5
-  JumpHeight: 1
+  JumpHeight: 1.5
   jumpCurve:
     serializedVersion: 2
     m_Curve:
@@ -917,26 +917,27 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.30481178
     - serializedVersion: 3
-      time: 0.82539433
-      value: 0.7589999
-      inSlope: -1.784195
-      outSlope: -1.784195
+      time: 0.7939135
+      value: 0.76914734
+      inSlope: -2.015306
+      outSlope: -2.015306
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.26015016
-      outWeight: 0.48215914
+      outWeight: 0.17873427
     - serializedVersion: 3
       time: 0.99989676
       value: 0.00014085276
-      inSlope: -9.498973
-      outSlope: -9.498973
+      inSlope: -5.750764
+      outSlope: -5.750764
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.122340545
+      inWeight: 0.09169463
       outWeight: 0
     m_PreInfinity: 0
     m_PostInfinity: 2
     m_RotationOrder: 4
+  JumpDuration: 0.6
 --- !u!60 &1267880002
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -1001,7 +1002,7 @@ MonoBehaviour:
   m_Spline:
     m_IsOpenEnded: 0
     m_ControlPoints:
-    - position: {x: -29.754105, y: -3.499581, z: 0}
+    - position: {x: -16.260387, y: -3.2887404, z: 0}
       leftTangent: {x: 0, y: 0, z: 0}
       rightTangent: {x: 0, y: 0, z: 0}
       mode: 0
@@ -1009,7 +1010,7 @@ MonoBehaviour:
       spriteIndex: 0
       corner: 1
       m_CornerMode: 1
-    - position: {x: -23.649672, y: 9.020163, z: 0}
+    - position: {x: -10.155957, y: 9.231012, z: 0}
       leftTangent: {x: 0, y: 0, z: 0}
       rightTangent: {x: 0, y: 0, z: 0}
       mode: 0
@@ -1017,7 +1018,7 @@ MonoBehaviour:
       spriteIndex: 0
       corner: 1
       m_CornerMode: 1
-    - position: {x: -11.451444, y: 9.009687, z: 0}
+    - position: {x: 2.0422754, y: 9.220537, z: 0}
       leftTangent: {x: 0, y: 0, z: 0}
       rightTangent: {x: 0, y: 0, z: 0}
       mode: 0
@@ -1025,7 +1026,7 @@ MonoBehaviour:
       spriteIndex: 0
       corner: 1
       m_CornerMode: 1
-    - position: {x: -10.772604, y: 4.053124, z: 0}
+    - position: {x: 2.7211142, y: 4.2639637, z: 0}
       leftTangent: {x: 0, y: 0, z: 0}
       rightTangent: {x: 0, y: 0, z: 0}
       mode: 0
@@ -1033,7 +1034,7 @@ MonoBehaviour:
       spriteIndex: 0
       corner: 1
       m_CornerMode: 1
-    - position: {x: -6.27297, y: 1.9999999, z: 0}
+    - position: {x: 7.220748, y: 2.2108393, z: 0}
       leftTangent: {x: 0, y: 0, z: 0}
       rightTangent: {x: 0, y: 0, z: 0}
       mode: 0
@@ -1154,8 +1155,8 @@ SpriteShapeRenderer:
   - {fileID: 21300000, guid: 608e61deb05c54660bebf5a4dd2ee02d, type: 3}
   - {fileID: 21300000, guid: 608e61deb05c54660bebf5a4dd2ee02d, type: 3}
   m_LocalAABB:
-    m_Center: {x: 5.4645653, y: 8.071725, z: 0}
-    m_Extent: {x: 35.21867, y: 11.638694, z: 0}
+    m_Center: {x: 12.211424, y: 8.071725, z: 0}
+    m_Extent: {x: 28.471811, y: 11.638694, z: 0}
   m_SpriteSortPoint: 0
 --- !u!4 &1843781344
 Transform:
@@ -1197,17 +1198,17 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -29.754105, y: -3.499581}
-      - {x: -23.649672, y: 9.020163}
-      - {x: -11.451444, y: 9.009687}
-      - {x: -10.772604, y: 4.053124}
-      - {x: -6.27297, y: 1.9999999}
+    - - {x: -16.260387, y: -3.2887404}
+      - {x: -10.155957, y: 9.231012}
+      - {x: 2.0422754, y: 9.220537}
+      - {x: 2.7211142, y: 4.2639637}
+      - {x: 7.220748, y: 2.2108393}
       - {x: 12.762282, y: 2.0918317}
       - {x: 24.683054, y: 7.224681}
       - {x: 28.83405, y: 16.013372}
       - {x: 40.275772, y: 19.710419}
       - {x: 40.683235, y: -3.5669692}
-      - {x: -26.331371, y: -3.5028558}
-      - {x: -28.856682, y: -3.5004396}
-      - {x: -29.754105, y: -3.499581}
+      - {x: -13.49335, y: -3.3022602}
+      - {x: -15.5348835, y: -3.2922854}
+      - {x: -16.260387, y: -3.2887404}
   m_UseDelaunayMesh: 0
