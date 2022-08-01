@@ -87,7 +87,7 @@ public class PlayerController : MonoBehaviour
         var directionAlongGround = Vector2.Perpendicular(_groundNormal) * -horizontal;
         var movement = directionAlongGround * Speed * Time.fixedDeltaTime;
 
-        var (normal, point) = CastDown(_rb.position + movement - JumpOffset, MovementFilter);
+        var (normal, point) = CastToGround(_rb.position + movement - JumpOffset);
         _groundNormal = normal;
         _positionOnGround = point;
 
@@ -111,28 +111,34 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    static (Vector2 normal, Vector2 point) CastDown(Vector2 position, ContactFilter2D contactFilter)
+    (Vector2 normal, Vector2 point) CastToGround(Vector2 position)
     {
         // Если не поднять точку, то она пропустит землю,
         // если мы в неё немного провалились
-        var pointAbove = position + Vector2.up * 5f;
+        var pointAbove = position + _groundNormal;
         var collisions = new RaycastHit2D[1];
 
         int count =
             Physics2D
                 .RaycastNonAlloc(pointAbove,
-                Vector2.down,
+                -_groundNormal,
                 collisions,
                 // Расстояние обязательно, без него не работает маска
                 // https://answers.unity.com/questions/1699320/why-wont-physicsraycastnonalloc-mask-layers-proper.html
                 100f,
-                contactFilter.layerMask);
+                MovementFilter.layerMask);
 
         if (count != 0)
         {
             return (collisions[0].normal, collisions[0].point);
         }
 
-        return (Vector2.up, position);
+        return (_groundNormal, position);
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(transform.position, _groundNormal);
     }
 }
