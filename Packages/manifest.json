@@ -2,7 +2,6 @@
   "dependencies": {
     "com.unity.2d.animation": "8.0.2",
     "com.unity.2d.spriteshape": "8.0.0",
-    "com.unity.animation.rigging": "1.1.1",
     "com.unity.ide.vscode": "1.2.5",
     "com.unity.render-pipelines.universal": "13.1.8",
     "com.unity.timeline": "1.7.1",
