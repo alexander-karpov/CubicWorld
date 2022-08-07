@@ -14,7 +14,11 @@ namespace CubicWorld.Common
 
         public float LegLength = 1f;
 
-        public AnimationCurve StepCurve;
+        // Как стопа отрывается от земли во время шага
+        public AnimationCurve FootUpCurve;
+
+        // Как масса тела снижает высоту корпуса после контакта
+        public AnimationCurve WeightPressureCurve;
 
         public Transform RightFoot;
 
@@ -48,10 +52,10 @@ namespace CubicWorld.Common
         // Update is called once per frame
         void Update()
         {
-            if (_lerp < 1)
+
             {
                 if (Input.GetAxisRaw("Horizontal") > 0) {
-                    Speed = 3;
+                    Speed = 2;
                 } else if (Input.GetAxisRaw("Horizontal") < 0) {
                     Speed = .1f;
                 }
@@ -77,6 +81,7 @@ namespace CubicWorld.Common
                 var a = Mathf.Sqrt(Mathf.Pow(LegLength, 2) - Mathf.Pow(x, 2));
                 var C = new Vector2(midpoint, A.y + a);
 
+                C.y += WeightPressureCurve.Evaluate(_lerp) * LegLength;
                 Body.position = C;
 
                 // Body.transform.position = Vector3.MoveTowards(
@@ -89,13 +94,15 @@ namespace CubicWorld.Common
                 //     Time.deltaTime
                 // );
 
-                pos.y += StepCurve.Evaluate(_lerp);
+                pos.y += FootUpCurve.Evaluate(_lerp) * LegLength;
                 _movingFoot.position = pos;
 
 
                 _lerp += Time.deltaTime * Speed;
             }
-            else
+
+
+            if (_lerp > 1)
             {
                 (_movingFoot, _staingFoot) = (_staingFoot, _movingFoot);
 

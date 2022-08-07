@@ -17,19 +17,33 @@ public class CameraController : MonoBehaviour
         target.x = Player.transform.position.x;
 
         // Размещает игрока по y на позицию золотого сечения
-        var ty = Camera.main.ViewportToWorldPoint(new Vector3(0, 1 - 0.618f, 0)).y;
-        target.y -= ty - Player.transform.position.y;
+        // var ty = Camera.main.ViewportToWorldPoint(new Vector3(0, 1 - 0.618f, 0)).y;
+        // target.y -= ty - Player.transform.position.y;
+        // if (Player.transform.localScale.x >= 0f)
+        // {
+        //     target.x += Offset;
+        // }
+        // else
+        // {
+        //     target.x -= Offset;
+        // }
+        var z = 7f;
+        var zy = 4f;
 
-        if (Player.transform.localScale.x >= 0f)
+        // transform.position =
+        //     Vector3.Lerp(transform.position, target, OffsetSmoothing * Time.deltaTime);
+        if (Mathf.Abs(transform.position.y - Player.transform.position.y) > zy)
         {
-            target.x += Offset;
-        }
-        else
-        {
-            target.x -= Offset;
+            var p = transform.position;
+            p.y = Player.transform.position.y + zy;
+            transform.position = p;
         }
 
-        transform.position =
-            Vector3.Lerp(transform.position, target, OffsetSmoothing * Time.deltaTime);
+        if (Mathf.Abs(transform.position.x - Player.transform.position.x) > z)
+        {
+            var p = transform.position;
+            p.x = Player.transform.position.x + z;
+            transform.position = p;
+        }
     }
 }
