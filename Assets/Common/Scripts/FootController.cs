@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-
+// -sin(x * 2 * pi)
 namespace CubicWorld.Common
 {
     public class FootController : MonoBehaviour
@@ -12,13 +12,13 @@ namespace CubicWorld.Common
         public float StepDistance = 2f;
         public float Speed = 1f;
 
-        public float LegLength = 1f;
+        public float LegLength = 1.9f;
 
         // Как стопа отрывается от земли во время шага
         public AnimationCurve FootUpCurve;
 
         // Как масса тела снижает высоту корпуса после контакта
-        public AnimationCurve WeightPressureCurve;
+        public float MassPressure = 0.01f;
 
         public Transform RightFoot;
 
@@ -47,25 +47,27 @@ namespace CubicWorld.Common
             _oldPosition = RightFoot.position;
         }
 
-        Vector2 _pos;
-
         // Update is called once per frame
         void Update()
         {
 
             {
-                if (Input.GetAxisRaw("Horizontal") > 0) {
+                if (Input.GetAxisRaw("Horizontal") > 0)
+                {
                     Speed = 2;
-                } else if (Input.GetAxisRaw("Horizontal") < 0) {
+                }
+                else if (Input.GetAxisRaw("Horizontal") < 0)
+                {
                     Speed = .1f;
                 }
-                else {
-                          Speed = 1;
+                else
+                {
+                    Speed = 1;
                 }
 
 
                 var pos = Vector2.Lerp(_oldPosition, _target, _lerp);
-                _pos = pos;
+
 
                 // Body.transform.position =
                 //     new Vector3((_staingFoot.position.x + _movingFoot.position.x) / 2f,
@@ -74,14 +76,14 @@ namespace CubicWorld.Common
 
                 // Ищем тут пересечение окружности радиусом LegLength с центром
                 // в нижней ноге и вертикальной прямой на позиции midpoint.x
-                var A = _staingFoot.position.y < pos.y ? (Vector2)_staingFoot.position : pos ;
-                var ANot = _staingFoot.position.y >= pos.y ? (Vector2)_staingFoot.position : pos ;
+                var A = _staingFoot.position.y < pos.y ? (Vector2)_staingFoot.position : pos;
+                var ANot = _staingFoot.position.y >= pos.y ? (Vector2)_staingFoot.position : pos;
                 var midpoint = Vector2.Lerp(A, ANot, 0.5f).x;
                 var x = A.x - midpoint;
                 var a = Mathf.Sqrt(Mathf.Pow(LegLength, 2) - Mathf.Pow(x, 2));
                 var C = new Vector2(midpoint, A.y + a);
 
-                C.y += WeightPressureCurve.Evaluate(_lerp) * LegLength;
+                C.y -= MassPressureValue(_lerp) * LegLength;
                 Body.position = C;
 
                 // Body.transform.position = Vector3.MoveTowards(
@@ -114,7 +116,8 @@ namespace CubicWorld.Common
             }
 
 
-            if (Input.GetAxisRaw("Jump") > 0.1) {
+            if (Input.GetAxisRaw("Jump") > 0.1)
+            {
                 _movingFoot.position = new Vector2(-60, -10);
                 _staingFoot.position = new Vector2(-60, -10);
                 _target = new Vector2(-60, -10);
@@ -134,7 +137,7 @@ namespace CubicWorld.Common
             // Ищем препятствия впереди
             int count =
                 Physics2D
-                    .Raycast(new Vector2(_staingFoot.position.x,midpoint.y + LegLength),
+                    .Raycast(new Vector2(_staingFoot.position.x, midpoint.y + LegLength),
                     new Vector2(horizontal, 0),
                     GroundFilter,
                     collisions,
@@ -152,7 +155,7 @@ namespace CubicWorld.Common
                 else
                 {
                     // Чуть-чуть отступаем от стены чтобы не ставить ногу прямо в угол
-                    xBound = collisions[0].point.x - (StepDistance/5*horizontal);
+                    xBound = collisions[0].point.x - (StepDistance / 5 * horizontal);
                 }
 
             }
@@ -176,60 +179,20 @@ namespace CubicWorld.Common
             return (Vector2.up, _staingFoot.position);
         }
 
-
-        void UpdateBodyPosition()
+        /// <summary>
+        /// Когда человек наступает на ногу, его тело немного опускается,
+        /// а нога сгибается под его весом. Длится примерно до середины шага.
+        /// </summary>
+        /// <param name="time">0 - 1</param>
+        float MassPressureValue(float time)
         {
-          var  midpointX = (_staingFoot.position.x + _movingFoot.position.x) / 2f;
+            if (time is > 0 and < .5f)
+            {
+                return Mathf.Abs(Mathf.Sin(time * 2 * Mathf.PI)) * MassPressure * LegLength;
+                // return (1 - Mathf.Abs(Mathf.Cos(time * 2 * Mathf.PI))) * MassPressure * LegLength;
+            }
 
-           var x2 = Mathf.Pow(midpointX - _staingFoot.position.x, 2);
-           var y = Mathf.Sqrt(Mathf.Pow(LegLength, 2) - x2);
-
-           Body.position = new Vector3(midpointX, y);
+            return 0;
         }
-
-        void OnDrawGizmos() {
-            // Gizmos.color = Color.yellow;
-            // Gizmos.DrawSphere(LeftFoot.position, 0.1f);
-
-            // Gizmos.color = Color.green;
-            // Gizmos.DrawSphere(RightFoot.position, 0.1f);
-
-            // var A = _staingFoot.position;
-            // var B = Vector2.Lerp(A, _pos, 0.5f);
-            // var c = Mathf.Abs(A.x - B.x);
-            // var b = LegLength;
-            // var a = Mathf.Sqrt(Mathf.Pow(b, 2) - Mathf.Pow(c, 2));
-            // var C = new Vector2(B.x, B.y + a);
-
-            // Gizmos.color = Color.red;
-            // Gizmos.DrawSphere(A, 0.1f);
-
-            // Gizmos.color = Color.green;
-            // Gizmos.DrawSphere(B, 0.1f);
-
-            // Gizmos.color = Color.yellow;
-            // Gizmos.DrawSphere(C, 0.1f);
-        }
-
-
-        // Vector2 SolveTridPointOfTriangle(Vector2 A, Vector2 C, float a, float c)
-        // {
-        //     // http://mathhelpplanet.com/viewtopic.php?f=28&t=22911
-        //     var (x1, y1, x2, y2) = (A.x, A.y, C.x, C.y);
-        //     var x1Pow2 = Mathf.Pow(x1, 2);
-        //     var x1Pow3 = Mathf.Pow(x1, 3);
-        //     var x2Pow2 = Mathf.Pow(x2, 2);
-        //     var y1Pow2 = Mathf.Pow(y1, 2);
-        //     var y1Pow3 = Mathf.Pow(y1, 3);
-        //     var y2Pow2 = Mathf.Pow(y2, 2);
-        //     var y2Pow3 = Mathf.Pow(y2, 3);
-        //     var aPow2 = Mathf.Pow(a, 2);
-        //     var cPow2 = Mathf.Pow(c, 2);
-
-        //     var x = (1 / 2) * ((y1 - y2) * Mathf.Sqrt(-(-x1Pow2 + 2 * x2 * x1 - x2Pow2 + (-c + a - y1 + y2) * (-c + a + y1 - y2)) * (-x1Pow2 + 2 * x2 * x1 - x2Pow2 + (c + a - y1 + y2) * (c + a + y1 - y2)) * Mathf.Pow(x1 - x2, 2)) + (x1Pow3 - x1Pow2 * x2 + (y2Pow2 - 2 * y1 * y2 - cPow2 + y1Pow2 + aPow2 - x2Pow2) * x1 - x2 * (aPow2 - cPow2 - x2Pow2 - y2Pow2 + 2 * y1 * y2 - y1Pow2)) * (x1 - x2)) / ((x1 - x2) * (x1Pow2 - 2 * x2 * x1 + x2Pow2 +  Mathf.Pow(y1 - y2, 2) ));
-        //     var y = (-Mathf.Sqrt(-(-x1Pow2 + 2 * x2 * x1 - x2Pow2 + (-c + a - y1 + y2) * (-c + a + y1 - y2)) * (-x1Pow2 + 2 * x2 * x1 - x2Pow2 + (c + a - y1 + y2) * (c + a + y1 - y2)) * Mathf.Pow(x1 - x2,2)) + y1Pow3 - y1Pow2 * y2 + (aPow2 + x1Pow2 - cPow2 + x2Pow2 - 2 * x2 * x1 - y2Pow2) * y1 + y2Pow3 + (x2Pow2 - 2 * x2 * x1 + cPow2 - aPow2 + x1Pow2) * y2) / (2 * y1Pow2 - 4 * y1 * y2 + 2 * y2Pow2 + 2 * Mathf.Pow(x1 - x2, 2));
-
-        //     return new Vector2(x, y);
-        // }
     }
 }

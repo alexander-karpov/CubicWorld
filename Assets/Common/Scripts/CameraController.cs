@@ -35,7 +35,9 @@ public class CameraController : MonoBehaviour
         if (Mathf.Abs(transform.position.y - Player.transform.position.y) > zy)
         {
             var p = transform.position;
-            p.y = Player.transform.position.y + zy;
+            p.y =
+                Player.transform.position.y +
+                (transform.position.y > Player.transform.position.y ? -zy : +zy);
             transform.position = p;
         }
 

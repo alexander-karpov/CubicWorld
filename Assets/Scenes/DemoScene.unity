@@ -1553,7 +1553,7 @@ MonoBehaviour:
   Body: {fileID: 1772190301}
   StepDistance: 1.9
   Speed: 1
-  LegLength: 1.895
+  LegLength: 1.9
   FootUpCurve:
     serializedVersion: 2
     m_Curve:
@@ -1629,6 +1629,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  MassPressure: 0.01
   RightFoot: {fileID: 322177160}
   LeftFoot: {fileID: 868037286}
   GroundFilter:

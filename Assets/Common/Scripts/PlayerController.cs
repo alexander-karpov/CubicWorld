@@ -50,9 +50,9 @@ public class PlayerController : MonoBehaviour
         var horizontal = Input.GetAxisRaw("Horizontal");
         var jump = Input.GetAxisRaw("Jump");
 
-        Move (horizontal);
-        Flip (horizontal);
-        Jump (jump);
+        Move(horizontal);
+        Flip(horizontal);
+        Jump(jump);
     }
 
     Vector2 JumpOffset
