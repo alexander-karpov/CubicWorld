@@ -1,8 +1,12 @@
 {
     "RoslynExtensionsOptions": {
         "EnableAnalyzersSupport": true,
+        "EnableNETAnalyzers": true,
+        "EnforceCodeStyleInBuild": true,
+        "AllEnabledByDefault": true,
         "LocationPaths": [
-            "./NuGet/microsoft.unity.analyzers.1.14.0"
+            "./NuGet/microsoft.unity.analyzers.1.14.0",
+            "./NuGet/Microsoft.CodeAnalysis.NetAnalyzers.6.0.5.1901"
         ]
     }
 }
