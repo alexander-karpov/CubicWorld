@@ -5,11 +5,11 @@ using UnityEngine;
 // This class violates the rule.
 public class UseReadOnly
 {
-    static readonly int x = 3;
+    const int x = 3;
 
     static readonly double y = x + 2.1;
 
-    static readonly string s = "readonly";
+    const string s = "readonly";
 
     public void Print()
     {

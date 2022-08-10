@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 // -sin(x * 2 * pi)
-namespace CubicWorld.Common
+namespace CubicWorld
 {
-    public class FootController : MonoBehaviour
+    public class WalkController : MonoBehaviour
     {
         public Transform Body;
 
@@ -51,57 +51,56 @@ namespace CubicWorld.Common
         void Update()
         {
 
+            if (Input.GetAxisRaw("Horizontal") > 0)
             {
-                if (Input.GetAxisRaw("Horizontal") > 0)
-                {
-                    Speed = 2;
-                }
-                else if (Input.GetAxisRaw("Horizontal") < 0)
-                {
-                    Speed = .1f;
-                }
-                else
-                {
-                    Speed = 1;
-                }
-
-
-                var pos = Vector2.Lerp(_oldPosition, _target, _lerp);
-
-
-                // Body.transform.position =
-                //     new Vector3((_staingFoot.position.x + _movingFoot.position.x) / 2f,
-                //         (_staingFoot.position.y + pos.y) / 2f + Height,
-                //         0f);
-
-                // Ищем тут пересечение окружности радиусом LegLength с центром
-                // в нижней ноге и вертикальной прямой на позиции midpoint.x
-                var A = _staingFoot.position.y < pos.y ? (Vector2)_staingFoot.position : pos;
-                var ANot = _staingFoot.position.y >= pos.y ? (Vector2)_staingFoot.position : pos;
-                var midpoint = Vector2.Lerp(A, ANot, 0.5f).x;
-                var x = A.x - midpoint;
-                var a = Mathf.Sqrt(Mathf.Pow(LegLength, 2) - Mathf.Pow(x, 2));
-                var C = new Vector2(midpoint, A.y + a);
-
-                C.y -= MassPressureValue(_lerp) * LegLength;
-                Body.position = C;
-
-                // Body.transform.position = Vector3.MoveTowards(
-                //     Body.transform.position,
-                //     new Vector3(
-                //         (_staingFoot.position.x + _movingFoot.position.x) / 2f,
-                //         (_staingFoot.position.y + pos.y) / 2f + Height,
-                //         0
-                //     ),
-                //     Time.deltaTime
-                // );
-
-                pos.y += FootUpCurve.Evaluate(_lerp) * LegLength;
-                _movingFoot.position = pos;
-
-
-                _lerp += Time.deltaTime * Speed;
+                Speed = 2;
             }
+            else if (Input.GetAxisRaw("Horizontal") < 0)
+            {
+                Speed = .1f;
+            }
+            else
+            {
+                Speed = 1;
+            }
+
+
+            var pos = Vector2.Lerp(_oldPosition, _target, _lerp);
+
+
+            // Body.transform.position =
+            //     new Vector3((_staingFoot.position.x + _movingFoot.position.x) / 2f,
+            //         (_staingFoot.position.y + pos.y) / 2f + Height,
+            //         0f);
+
+            // Ищем тут пересечение окружности радиусом LegLength с центром
+            // в нижней ноге и вертикальной прямой на позиции midpoint.x
+            var A = _staingFoot.position.y < pos.y ? (Vector2)_staingFoot.position : pos;
+            var ANot = _staingFoot.position.y >= pos.y ? (Vector2)_staingFoot.position : pos;
+            var midpoint = Vector2.Lerp(A, ANot, 0.5f).x;
+            var x = A.x - midpoint;
+            var a = Mathf.Sqrt(Mathf.Pow(LegLength, 2) - Mathf.Pow(x, 2));
+            var C = new Vector2(midpoint, A.y + a);
+
+            C.y -= MassPressureValue(_lerp) * LegLength;
+            Body.position = C;
+
+            // Body.transform.position = Vector3.MoveTowards(
+            //     Body.transform.position,
+            //     new Vector3(
+            //         (_staingFoot.position.x + _movingFoot.position.x) / 2f,
+            //         (_staingFoot.position.y + pos.y) / 2f + Height,
+            //         0
+            //     ),
+            //     Time.deltaTime
+            // );
+
+            pos.y += FootUpCurve.Evaluate(_lerp) * LegLength;
+            _movingFoot.position = pos;
+
+
+            _lerp += Time.deltaTime * Speed;
+
 
 
             if (_lerp > 1)
