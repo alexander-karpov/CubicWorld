@@ -1551,85 +1551,102 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Body: {fileID: 1772190301}
-  StepDistance: 1.9
+  StepDistance: 1.6
   Speed: 1
   LegLength: 1.9
-  FootUpCurve:
+  FootRaising:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: -0.00011675898
       value: 0.00014041364
-      inSlope: 0.72539616
-      outSlope: 0.72539616
+      inSlope: 9.908
+      outSlope: 9.908
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.28135988
+      outWeight: 0.097244695
     - serializedVersion: 3
-      time: 0.12477133
-      value: 0.072804764
-      inSlope: 0.29184115
-      outSlope: 0.29184115
+      time: 0.25844893
+      value: 0.9984759
+      inSlope: 0.07734285
+      outSlope: 0.07734285
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33648452
-      outWeight: 0.09149451
+      inWeight: 0.26488295
+      outWeight: 0.29214552
     - serializedVersion: 3
       time: 0.99989676
       value: 0.00014085276
-      inSlope: -0.042440962
-      outSlope: -0.042440962
+      inSlope: -0.52660257
+      outSlope: -0.52660257
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.1915635
+      inWeight: 0.26558435
       outWeight: 0
     m_PreInfinity: 1
     m_PostInfinity: 1
     m_RotationOrder: 4
-  WeightPressureCurve:
+  FootRaisingFactor: 0.169
+  MassPressure:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: -0.000034846365
-      value: 0.00003042657
-      inSlope: -0.22466484
-      outSlope: -0.22466484
+      time: -0.00032009813
+      value: -0.000051715528
+      inSlope: -1.4866798
+      outSlope: -1.4866798
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.24419618
+      outWeight: 0.08967444
     - serializedVersion: 3
-      time: 0.5001487
-      value: -0.000032825046
-      inSlope: 0.120040074
-      outSlope: 0.120040074
+      time: 0.3369358
+      value: -0.2048167
+      inSlope: 1.0633013
+      outSlope: 1.0633013
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.94944185
-      outWeight: 0.00987122
+      inWeight: 0.0666128
+      outWeight: 0.03336817
     - serializedVersion: 3
-      time: 0.50015926
-      value: -0.000085532665
-      inSlope: 0.055722214
-      outSlope: 0.055722214
+      time: 0.9004585
+      value: -0.0001960037
+      inSlope: 0.002118952
+      outSlope: 0.002118952
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.054639522
-      outWeight: 0.11028807
-    - serializedVersion: 3
-      time: 1.0002985
-      value: -0.000058710866
-      inSlope: -0.0069910223
-      outSlope: -0.0069910223
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.24314441
+      inWeight: 1
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  MassPressure: 0.01
+  MassPressureFactor: 0.155
+  ContactAcceleration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1.3967638
+      outSlope: 1.3967638
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.23493975
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1.5146383
+      outSlope: 1.5146383
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.15512049
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ContactAccelerationFactor: 0.33
   RightFoot: {fileID: 322177160}
   LeftFoot: {fileID: 868037286}
   GroundFilter:

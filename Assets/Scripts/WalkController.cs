@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-// -sin(x * 2 * pi)
+
 namespace CubicWorld
 {
     public class WalkController : MonoBehaviour
@@ -10,15 +10,30 @@ namespace CubicWorld
         public Transform Body;
 
         public float StepDistance = 2f;
+
         public float Speed = 1f;
 
         public float LegLength = 1.9f;
 
         // Как стопа отрывается от земли во время шага
-        public AnimationCurve FootUpCurve;
+        public AnimationCurve FootRaising;
+
+        [Range(0f, 1f)]
+        public float FootRaisingFactor = 0f;
 
         // Как масса тела снижает высоту корпуса после контакта
-        public float MassPressure = 0.01f;
+        public AnimationCurve MassPressure;
+
+        // Как сильно влияет MassPressure
+        [Range(0f, 1f)]
+        public float MassPressureFactor = 0f;
+
+        // Фазы контакта проходят быстрее остальных
+        public AnimationCurve ContactAcceleration;
+
+        // Как сильно влияет PhasesDuration
+        [Range(0f, 1f)]
+        public float ContactAccelerationFactor;
 
         public Transform RightFoot;
 
@@ -34,7 +49,7 @@ namespace CubicWorld
 
         Vector2 _oldPosition;
 
-        float _lerp = 0;
+        float _time = 0;
 
         void Start()
         {
@@ -50,39 +65,44 @@ namespace CubicWorld
         // Update is called once per frame
         void Update()
         {
-
             if (Input.GetAxisRaw("Horizontal") > 0)
             {
-                Speed = 2;
+                Speed = 1.5f;
             }
             else if (Input.GetAxisRaw("Horizontal") < 0)
             {
-                Speed = .1f;
+                Speed = .2f;
             }
             else
             {
                 Speed = 1;
             }
 
+            var phase =
+                Mathf.Lerp(_time, ContactAcceleration.Evaluate(_time), ContactAccelerationFactor);
 
-            var pos = Vector2.Lerp(_oldPosition, _target, _lerp);
-
+            var centerOfMass = Vector2.Lerp(_oldPosition, _target, phase);
 
             // Body.transform.position =
             //     new Vector3((_staingFoot.position.x + _movingFoot.position.x) / 2f,
             //         (_staingFoot.position.y + pos.y) / 2f + Height,
             //         0f);
-
             // Ищем тут пересечение окружности радиусом LegLength с центром
             // в нижней ноге и вертикальной прямой на позиции midpoint.x
-            var A = _staingFoot.position.y < pos.y ? (Vector2)_staingFoot.position : pos;
-            var ANot = _staingFoot.position.y >= pos.y ? (Vector2)_staingFoot.position : pos;
+            var A =
+                _staingFoot.position.y < centerOfMass.y
+                    ? (Vector2) _staingFoot.position
+                    : centerOfMass;
+            var ANot =
+                _staingFoot.position.y >= centerOfMass.y
+                    ? (Vector2) _staingFoot.position
+                    : centerOfMass;
             var midpoint = Vector2.Lerp(A, ANot, 0.5f).x;
             var x = A.x - midpoint;
             var a = Mathf.Sqrt(Mathf.Pow(LegLength, 2) - Mathf.Pow(x, 2));
             var C = new Vector2(midpoint, A.y + a);
 
-            C.y -= MassPressureValue(_lerp) * LegLength;
+            C.y += MassPressure.Evaluate(phase) * MassPressureFactor;
             Body.position = C;
 
             // Body.transform.position = Vector3.MoveTowards(
@@ -94,26 +114,22 @@ namespace CubicWorld
             //     ),
             //     Time.deltaTime
             // );
+            var movingFootPos = centerOfMass;
+            movingFootPos.y += FootRaising.Evaluate(_time) * FootRaisingFactor * LegLength;
+            _movingFoot.position = movingFootPos;
 
-            pos.y += FootUpCurve.Evaluate(_lerp) * LegLength;
-            _movingFoot.position = pos;
+            _time += Time.deltaTime * Speed;
 
-
-            _lerp += Time.deltaTime * Speed;
-
-
-
-            if (_lerp > 1)
+            if (_time > 1)
             {
                 (_movingFoot, _staingFoot) = (_staingFoot, _movingFoot);
 
                 var (n, p) = FindNextStepPoint(1);
 
                 _target = p;
-                _lerp = 0;
+                _time = 0;
                 _oldPosition = _movingFoot.position;
             }
-
 
             if (Input.GetAxisRaw("Jump") > 0.1)
             {
@@ -126,7 +142,7 @@ namespace CubicWorld
 
         (Vector2 normal, Vector2 point) FindNextStepPoint(float horizontal)
         {
-            Assert.IsTrue(horizontal is 1 or -1);
+            Assert.IsTrue(horizontal == 1 || horizontal == -1);
 
             var midpoint = Vector2.Lerp(LeftFoot.position, RightFoot.position, 0.5f);
 
@@ -156,13 +172,11 @@ namespace CubicWorld
                     // Чуть-чуть отступаем от стены чтобы не ставить ногу прямо в угол
                     xBound = collisions[0].point.x - (StepDistance / 5 * horizontal);
                 }
-
             }
 
             count =
                 Physics2D
-                    .Raycast(new Vector2(xBound,
-                       midpoint.y + LegLength),
+                    .Raycast(new Vector2(xBound, midpoint.y + LegLength),
                     Vector2.down,
                     GroundFilter,
                     collisions,
@@ -176,22 +190,6 @@ namespace CubicWorld
             }
 
             return (Vector2.up, _staingFoot.position);
-        }
-
-        /// <summary>
-        /// Когда человек наступает на ногу, его тело немного опускается,
-        /// а нога сгибается под его весом. Длится примерно до середины шага.
-        /// </summary>
-        /// <param name="time">0 - 1</param>
-        float MassPressureValue(float time)
-        {
-            if (time is > 0 and < .5f)
-            {
-                return Mathf.Abs(Mathf.Sin(time * 2 * Mathf.PI)) * MassPressure * LegLength;
-                // return (1 - Mathf.Abs(Mathf.Cos(time * 2 * Mathf.PI))) * MassPressure * LegLength;
-            }
-
-            return 0;
         }
     }
 }

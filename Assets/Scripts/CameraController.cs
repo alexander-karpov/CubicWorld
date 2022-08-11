@@ -13,7 +13,7 @@ public class UseReadOnly
 
     public void Print()
     {
-        System.Console.WriteLine (s);
+        System.Console.WriteLine(s);
     }
 }
 
@@ -28,7 +28,7 @@ public class UseConstant
 
     public void Print()
     {
-        System.Console.WriteLine (s);
+        System.Console.WriteLine(s);
     }
 }
 
