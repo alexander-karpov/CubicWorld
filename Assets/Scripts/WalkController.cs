@@ -19,21 +19,25 @@ namespace CubicWorld
         public AnimationCurve FootRaising;
 
         [Range(0f, 1f)]
-        public float FootRaisingFactor = 0f;
+        public float FootRaisingFactor = 0;
 
         // Как масса тела снижает высоту корпуса после контакта
         public AnimationCurve MassPressure;
 
-        // Как сильно влияет MassPressure
         [Range(0f, 1f)]
-        public float MassPressureFactor = 0f;
+        public float MassPressureFactor = 0;
 
         // Фазы контакта проходят быстрее остальных
         public AnimationCurve ContactAcceleration;
 
-        // Как сильно влияет PhasesDuration
         [Range(0f, 1f)]
         public float ContactAccelerationFactor;
+
+        // Движение пятки постепенно ускоряется
+        public AnimationCurve FootAcceleration;
+
+        [Range(0f, 1f)]
+        public float FootAccelerationFactor = 0;
 
         public Transform RightFoot;
 
@@ -67,7 +71,7 @@ namespace CubicWorld
         {
             if (Input.GetAxisRaw("Horizontal") > 0)
             {
-                Speed = 1.5f;
+                Speed = 3f;
             }
             else if (Input.GetAxisRaw("Horizontal") < 0)
             {
@@ -114,8 +118,17 @@ namespace CubicWorld
             //     ),
             //     Time.deltaTime
             // );
-            var movingFootPos = centerOfMass;
-            movingFootPos.y += FootRaising.Evaluate(_time) * FootRaisingFactor * LegLength;
+            var footTime =
+                Mathf.Lerp(_time, FootAcceleration.Evaluate(_time), FootAccelerationFactor);
+            var movingFootPos = Vector2.Lerp(_oldPosition, _target, footTime);
+            movingFootPos.y += FootRaising.Evaluate(footTime) * FootRaisingFactor * LegLength;
+
+            // movingFootPos.x =
+            // Mathf
+            //     .Lerp(FootAcceleration.Evaluate(_time),
+            //     movingFootPos.x,
+            //     FootAccelerationFactor);
+            // movingFootPos.x = _oldPosition.x + FootAcceleration.Evaluate(_time);
             _movingFoot.position = movingFootPos;
 
             _time += Time.deltaTime * Speed;
